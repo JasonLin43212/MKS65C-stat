@@ -1,25 +1,45 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <time.h>
+#include <string.h>
 
-void print_bit(char c){
+void to_rwx(char * permissions, char * output) {
   int i;
-  for (i=0; i<8; i++){
-    printf("%d",c&1);
-    c >>= 1;
+  strcat(output,"-");
+  for (i=0; i<3; i++){
+    char cur = *permissions;
+    if (cur == '1') {
+      strcat(output,"--x");
+    }
+    if (cur == '2') {
+      strcat(output,"-w-");
+    }
+    if (cur == '3') {
+      strcat(output,"-wx");
+    }
+    if (cur == '4') {
+      strcat(output,"r--");
+    }
+    if (cur == '5') {
+      strcat(output,"r-x");
+    }
+    if (cur == '6') {
+      strcat(output,"rw-");
+    }
+    if (cur == '7') {
+      strcat(output,"rwx");
+    }
+    permissions++;
   }
-  printf("\n");
 }
 
-int main() {
-
+void print_stats(char * filename){
   struct stat test;
-
-  //stat("testfile.txt",&test);
-  stat("table.jpg",&test);
-  printf("Showing stats of <table.jpg>\n========================\n");
+  stat(filename,&test);
+  printf("Showing stats of <%s>\n========================\n",filename);
   printf("Size: %ld\n",test.st_size);
 
   char buffboi[50];
@@ -31,31 +51,19 @@ int main() {
   printf("%s\n",buffboi);
 
   printf("Permission: %u\n",test.st_mode);
-  /*
-  char * permission = &test.st_mode;
-  printf("\n%p\n",permission);
-  print_bit(*permission);
-  permission += 1;
-  printf("\n%p\n",permission);
-  print_bit(*permission);
-  permission += 1;
-  printf("\n%p\n",permission);
-  print_bit(*permission);
-  permission += 1;
-  printf("\n%p\n",permission);
-  print_bit(*permission);
-  permission += 1;
-  printf("\n%p\n",permission);
-  print_bit(*permission);
-  
-  int * permission = &test.st_mode;
-  permission += 2;
-  print_bit(*permission);
-  permission++;
-  printf("\n");
-  print_bit(*permission);
-  */
-  printf("Access time: %s\n",ctime(&test.st_atime));
 
+  char rwx[3];
+  char output[10];
+  sprintf(rwx,"%o",test.st_mode&0b111111111);
+  to_rwx(rwx,output);
+  printf("Access time: %s",ctime(&test.st_atime));
+  printf("Printing permission in ls -l format:\n");
+  printf("%s\n\n",output);
+}
+
+int main() {
+  print_stats("testfile.txt");
+  print_stats("table.jpg");
+  print_stats("video.mp4");
   return 0;
 }
