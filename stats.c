@@ -2,6 +2,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <time.h>
 
 int main() {
 
@@ -9,11 +10,10 @@ int main() {
 
   stat("testfile.txt",&test);
 
-  printf("Showing stats of <testfile.txt>");
-  printf("Size: %d",test.st_size);
-  printf("Permissions: %ld",test.st_mode);
-  printf("Access time: %ld",test.st_atime);
-  
+  printf("Showing stats of <testfile.txt>\n");
+  printf("Size: %ld\n",test.st_size);
+  printf("Permissions: %ud\n",test.st_mode);
+  printf("Access time: %s\n",ctime(&test.st_atime));
 
   return 0;
 }
